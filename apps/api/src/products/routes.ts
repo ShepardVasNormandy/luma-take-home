@@ -1,25 +1,38 @@
 import type { FastifyInstance } from "fastify";
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { importRows, imports, products, shotRequests } from "../db/schema.js";
 import { loadRequests } from "../requests/projection-loader.js";
+import { summarizeProductRequests } from "./summary.js";
 
 export async function productRoutes(app: FastifyInstance) {
   app.get("/products", async () => {
     const all = await db().select().from(products).orderBy(asc(products.sku));
     if (all.length === 0) return { products: [] };
 
-    const counts = await db()
-      .select({
-        productId: shotRequests.productId,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(shotRequests)
-      .groupBy(shotRequests.productId);
-    const countByProduct = new Map(counts.map((c) => [c.productId, c.count]));
+    const requestIds = await db().select({ id: shotRequests.id }).from(shotRequests);
+    const loaded = await loadRequests(requestIds.map((r) => r.id));
+    const summaries = summarizeProductRequests(
+      [...loaded.values()].map((l) => ({
+        productId: l.request.productId,
+        status: l.status,
+        candidates: l.candidates.map((c) => ({
+          decision: c.decision?.decision ?? null,
+          assetState: c.asset?.storeState ?? null,
+          publicId: c.asset?.publicId ?? null,
+          reviewedAt: c.decision?.reviewedAt ?? null,
+        })),
+      })),
+    );
 
+    const empty = {
+      requestCount: 0,
+      statusCounts: {},
+      approvedCount: 0,
+      approvedAssetPublicId: null,
+    };
     return {
-      products: all.map((p) => ({ ...p, requestCount: countByProduct.get(p.id) ?? 0 })),
+      products: all.map((p) => ({ ...p, ...(summaries[p.id] ?? empty) })),
     };
   });
 
