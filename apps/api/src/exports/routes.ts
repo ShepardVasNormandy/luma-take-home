@@ -9,7 +9,7 @@ import { loadRequestsByImport, type LoadedRequest } from "../requests/projection
 import { isBudgetExhausted } from "../worker/generation.js";
 import {
   buildExportRows,
-  computeImportReady,
+  computeImportReadiness,
   exportFilename,
   type ImportRowLike,
   type LoadedRequestLike,
@@ -58,8 +58,8 @@ export async function exportRoutes(app: FastifyInstance) {
       apiPublicUrl: apiPublicUrl(),
     });
 
-    const ready = computeImportReady([...loaded.values()]);
-    const filename = exportFilename(imp.originalFilename, ready, new Date()).replace(/"/g, "");
+    const readiness = computeImportReadiness([...loaded.values()], rows);
+    const filename = exportFilename(imp.originalFilename, readiness, new Date()).replace(/"/g, "");
 
     return reply
       .header("content-type", "text/csv; charset=utf-8")
@@ -103,7 +103,7 @@ export async function exportRoutes(app: FastifyInstance) {
       pendingReview: statusCounts.AWAITING_REVIEW,
       spendUsd: Number(spendUsd.toFixed(4)),
       approvedImages,
-      importReady: computeImportReady([...loaded.values()]),
+      readiness: computeImportReadiness([...loaded.values()], rows),
       statusCounts,
       rowStats,
       budgetExhausted,

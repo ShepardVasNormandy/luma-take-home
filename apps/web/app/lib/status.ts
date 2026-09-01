@@ -1,7 +1,14 @@
-import type { RejectionReason, RequestStatus } from "@shots/shared";
+import type { ImportReadiness, RejectionReason, RequestStatus } from "@shots/shared";
 import { PRICE_USD } from "@shots/shared";
 
 export const PRICE_PER_IMAGE = PRICE_USD["uni-1"].imageEdit;
+
+export const READINESS_LABELS: Record<ImportReadiness, string> = {
+  READY: "Import ready",
+  PARTIAL: "Not ready yet",
+  NOT_STARTED: "Not started",
+  NO_REQUESTS: "No requests",
+};
 
 export const STATUS_LABELS: Record<RequestStatus, string> = {
   CLOSED: "Closed",

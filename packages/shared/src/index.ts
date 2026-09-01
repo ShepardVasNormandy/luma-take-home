@@ -42,6 +42,10 @@ export const EXPORT_STATUS_LABELS: Record<RequestStatus, string> = {
   READY_TO_GENERATE: "In progress",
 };
 
+export const IMPORT_READINESS = ["READY", "PARTIAL", "NOT_STARTED", "NO_REQUESTS"] as const;
+
+export type ImportReadiness = (typeof IMPORT_READINESS)[number];
+
 // docs/adr/0002: observed uni-1 image_edit pricing (price snapshot source).
 export const PRICE_USD = {
   "uni-1": { imageEdit: 0.0434 },

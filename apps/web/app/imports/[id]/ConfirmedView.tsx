@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { REQUEST_STATUSES, type RequestStatus } from "@shots/shared";
 import { api, errorMessage } from "../../lib/api";
-import { STATUS_LABELS, statusChipClass, usd } from "../../lib/status";
+import { READINESS_LABELS, STATUS_LABELS, statusChipClass, usd } from "../../lib/status";
 import type {
   ImportDetail,
   ImportSummary,
@@ -136,12 +136,10 @@ export function ConfirmedView({
               </div>
             </div>
           ) : null}
-          {typeof summary.importReady === "boolean" ? (
-            summary.importReady ? (
-              <span className="chip chip-green">Import ready</span>
-            ) : (
-              <span className="chip chip-neutral">Not ready yet</span>
-            )
+          {summary.readiness ? (
+            <span className={`chip ${summary.readiness === "READY" ? "chip-green" : "chip-neutral"}`}>
+              {READINESS_LABELS[summary.readiness]}
+            </span>
           ) : null}
         </div>
       ) : null}

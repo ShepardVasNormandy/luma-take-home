@@ -1,6 +1,7 @@
 import type {
   AssetStoreState,
   AttemptState,
+  ImportReadiness,
   RejectionReason,
   RequestStatus,
 } from "@shots/shared";
@@ -122,7 +123,7 @@ export interface ShotRequestDetail {
 export interface ImportSummary {
   counts?: Partial<Record<RequestStatus, number>>;
   spendUsd?: number;
-  importReady?: boolean;
+  readiness?: ImportReadiness;
   budgetExhausted?: boolean;
   [key: string]: unknown;
 }

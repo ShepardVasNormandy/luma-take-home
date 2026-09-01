@@ -1,4 +1,4 @@
-import { EXPORT_STATUS_LABELS, type RequestStatus } from "@shots/shared";
+import { EXPORT_STATUS_LABELS, type ImportReadiness, type RequestStatus } from "@shots/shared";
 
 export interface ImportRowLike {
   rowIndex: number;
@@ -85,12 +85,38 @@ export function buildExportRows(input: {
   return { header, records };
 }
 
-export function computeImportReady(requests: { status: RequestStatus }[]): boolean {
-  return requests.every((r) => r.status === "READY" || r.status === "CLOSED");
+export interface ReadinessRowLike {
+  creativeWork: "NO_REQUEST" | "REQUEST_ELIGIBLE" | "NEEDS_INPUT";
 }
 
-export function exportFilename(originalFilename: string, ready: boolean, date: Date): string {
+// Vacuous readiness ruled out (APPROACH.md decision, 2026-09-01): with zero requests,
+// an import is NOT_STARTED if any row had a workable idea (staging maps INVALID rows
+// to NO_REQUEST, so they never count), NO_REQUESTS otherwise.
+export function computeImportReadiness(
+  requests: { status: RequestStatus }[],
+  rows: ReadinessRowLike[],
+): ImportReadiness {
+  if (requests.length === 0) {
+    return rows.some((r) => r.creativeWork !== "NO_REQUEST") ? "NOT_STARTED" : "NO_REQUESTS";
+  }
+  return requests.every((r) => r.status === "READY" || r.status === "CLOSED")
+    ? "READY"
+    : "PARTIAL";
+}
+
+const FILENAME_TOKENS: Record<ImportReadiness, string> = {
+  READY: "ready",
+  PARTIAL: "partial",
+  NOT_STARTED: "not-started",
+  NO_REQUESTS: "no-requests",
+};
+
+export function exportFilename(
+  originalFilename: string,
+  readiness: ImportReadiness,
+  date: Date,
+): string {
   const basename = originalFilename.split("/").pop()!.split("\\").pop()!;
   const stem = basename.replace(/\.[^.]*$/, "") || "export";
-  return `${stem}-${ready ? "ready" : "partial"}-${date.toISOString().slice(0, 10)}.csv`;
+  return `${stem}-${FILENAME_TOKENS[readiness]}-${date.toISOString().slice(0, 10)}.csv`;
 }

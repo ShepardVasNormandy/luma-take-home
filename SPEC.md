@@ -100,7 +100,7 @@ Pure function `projectStatus(request, rows...)` in `packages/shared`, unit-teste
 
 `invalidatesDirection` lives beside the reason enum in `packages/shared`.
 
-Import Ready = all its shot_requests project READY or CLOSED, and no unresolved blocking row issues (INVALID rows are warned-and-excluded, non-blocking; NEEDS_INPUT blocks via its request).
+Import readiness (`computeImportReadiness`, four-valued, per CONTEXT.md): `READY` = ≥1 shot_request and all project READY or CLOSED; `PARTIAL` = requests exist, any elsewhere; `NOT_STARTED` = zero requests but ≥1 row with `creative_work ≠ NO_REQUEST` (workable idea existed — all deferred, or import still staged); `NO_REQUESTS` = zero requests and none such row. INVALID rows are warned-and-excluded and staged as `creative_work = NO_REQUEST`, so they never count as workable; NEEDS_INPUT blocks via its request. Surfaces in `GET /imports/:id/summary` (`readiness`) and the export filename token.
 
 ## 4. Prompt assembly (integration code, `apps/api/src/luma/assemble.ts`)
 
@@ -171,7 +171,7 @@ Reviewer (token, mobile-first):
 - rows in `row_index` order, values from `raw` (semantic preservation, unknown columns included, original header order)
 - appended: `Shot Status`, `Approved Count`, `Approved Image 1..N` (N = max(3, max required_approvals in import); approval-order fill; blank when empty), `Last Reviewed At`
 - Shot Status mapping per CONTEXT.md vocabulary; approved image cells = `API_URL/assets/<publicId>`
-- filename `<original-basename>-<ready|partial>-<YYYY-MM-DD>.csv`
+- filename `<original-basename>-<ready|partial|not-started|no-requests>-<YYYY-MM-DD>.csv` (token = import readiness, §3)
 - zip (stretch): approved assets, `SKU_approved-01.jpg` naming via Content-Disposition-style projection at write time.
 
 ## 9. Config

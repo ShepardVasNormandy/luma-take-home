@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EXPORT_STATUS_LABELS, REQUEST_STATUSES } from "@shots/shared";
 import {
   buildExportRows,
-  computeImportReady,
+  computeImportReadiness,
   exportFilename,
   type ExportCandidateLike,
   type ImportRowLike,
@@ -180,40 +180,72 @@ describe("buildExportRows — approvals", () => {
   });
 });
 
-describe("computeImportReady", () => {
-  it("is ready when empty", () => {
-    expect(computeImportReady([])).toBe(true);
+describe("computeImportReadiness", () => {
+  const noRequest = { creativeWork: "NO_REQUEST" as const };
+  const eligible = { creativeWork: "REQUEST_ELIGIBLE" as const };
+  const needsInput = { creativeWork: "NEEDS_INPUT" as const };
+
+  it("is NO_REQUESTS when no requests exist and no row ever had a workable idea", () => {
+    expect(computeImportReadiness([], [])).toBe("NO_REQUESTS");
+    expect(computeImportReadiness([], [noRequest, noRequest])).toBe("NO_REQUESTS");
   });
 
-  it("is ready when every request is READY or CLOSED", () => {
-    expect(computeImportReady([{ status: "READY" }, { status: "CLOSED" }])).toBe(true);
+  it("is NOT_STARTED when work could have started but no request was created", () => {
+    expect(computeImportReadiness([], [noRequest, eligible])).toBe("NOT_STARTED");
+    expect(computeImportReadiness([], [needsInput])).toBe("NOT_STARTED");
   });
 
-  it("is not ready when any request is elsewhere in the lifecycle", () => {
-    expect(computeImportReady([{ status: "READY" }, { status: "GENERATING" }])).toBe(false);
+  it("is READY when at least one request exists and every request is READY or CLOSED", () => {
+    expect(
+      computeImportReadiness([{ status: "READY" }, { status: "CLOSED" }], [eligible, noRequest]),
+    ).toBe("READY");
+  });
+
+  it("stays READY when everything was explicitly closed", () => {
+    expect(computeImportReadiness([{ status: "CLOSED" }], [eligible])).toBe("READY");
+  });
+
+  it("is PARTIAL when any request is elsewhere in the lifecycle", () => {
+    expect(
+      computeImportReadiness([{ status: "READY" }, { status: "GENERATING" }], [eligible]),
+    ).toBe("PARTIAL");
   });
 });
 
 describe("exportFilename", () => {
   const date = new Date("2026-09-01T10:30:00Z");
 
-  it("carries basename, ready state, and date", () => {
-    expect(exportFilename("september-drop.csv", true, date)).toBe(
+  it("carries basename, readiness token, and date", () => {
+    expect(exportFilename("september-drop.csv", "READY", date)).toBe(
       "september-drop-ready-2026-09-01.csv",
     );
   });
 
   it("marks partial exports", () => {
-    expect(exportFilename("september-drop.csv", false, date)).toBe(
+    expect(exportFilename("september-drop.csv", "PARTIAL", date)).toBe(
       "september-drop-partial-2026-09-01.csv",
     );
   });
 
+  it("marks not-started exports", () => {
+    expect(exportFilename("september-drop.csv", "NOT_STARTED", date)).toBe(
+      "september-drop-not-started-2026-09-01.csv",
+    );
+  });
+
+  it("marks no-requests exports", () => {
+    expect(exportFilename("september-drop.csv", "NO_REQUESTS", date)).toBe(
+      "september-drop-no-requests-2026-09-01.csv",
+    );
+  });
+
   it("strips only the last extension", () => {
-    expect(exportFilename("catalog.v2.csv", true, date)).toBe("catalog.v2-ready-2026-09-01.csv");
+    expect(exportFilename("catalog.v2.csv", "READY", date)).toBe(
+      "catalog.v2-ready-2026-09-01.csv",
+    );
   });
 
   it("handles names without an extension", () => {
-    expect(exportFilename("catalog", true, date)).toBe("catalog-ready-2026-09-01.csv");
+    expect(exportFilename("catalog", "READY", date)).toBe("catalog-ready-2026-09-01.csv");
   });
 });
