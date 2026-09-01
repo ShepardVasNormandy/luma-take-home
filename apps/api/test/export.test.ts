@@ -3,6 +3,7 @@ import { EXPORT_STATUS_LABELS, REQUEST_STATUSES } from "@shots/shared";
 import {
   buildExportRows,
   computeImportReadiness,
+  computeReadinessByImport,
   exportFilename,
   type ExportCandidateLike,
   type ImportRowLike,
@@ -209,6 +210,37 @@ describe("computeImportReadiness", () => {
     expect(
       computeImportReadiness([{ status: "READY" }, { status: "GENERATING" }], [eligible]),
     ).toBe("PARTIAL");
+  });
+});
+
+describe("computeReadinessByImport", () => {
+  const eligible = (importId: string) => ({ importId, creativeWork: "REQUEST_ELIGIBLE" as const });
+  const noRequest = (importId: string) => ({ importId, creativeWork: "NO_REQUEST" as const });
+
+  it("groups requests and rows by import without leaking across imports", () => {
+    const result = computeReadinessByImport(
+      ["done", "underway"],
+      [
+        { importId: "done", status: "READY" },
+        { importId: "done", status: "CLOSED" },
+        { importId: "underway", status: "GENERATING" },
+      ],
+      [eligible("done"), eligible("underway")],
+    );
+    expect(result).toEqual({ done: "READY", underway: "PARTIAL" });
+  });
+
+  it("distinguishes NOT_STARTED from NO_REQUESTS for imports with zero requests", () => {
+    const result = computeReadinessByImport(
+      ["deferred", "empty"],
+      [],
+      [eligible("deferred"), noRequest("deferred"), noRequest("empty")],
+    );
+    expect(result).toEqual({ deferred: "NOT_STARTED", empty: "NO_REQUESTS" });
+  });
+
+  it("yields NO_REQUESTS for an import with no requests and no rows", () => {
+    expect(computeReadinessByImport(["bare"], [], [])).toEqual({ bare: "NO_REQUESTS" });
   });
 });
 

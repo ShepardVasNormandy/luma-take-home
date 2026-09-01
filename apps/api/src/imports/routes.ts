@@ -2,7 +2,9 @@ import type { FastifyInstance } from "fastify";
 import { createHash } from "node:crypto";
 import { asc, eq, inArray } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { importRows, imports, products } from "../db/schema.js";
+import { importRows, imports, products, shotRequests } from "../db/schema.js";
+import { computeReadinessByImport } from "../exports/builder.js";
+import { loadRequests } from "../requests/projection-loader.js";
 import { CsvParseError, parseCatalogCsv } from "./parse.js";
 import { computeDisposition } from "./stage.js";
 import { preflightMany } from "./preflight.js";
@@ -94,7 +96,27 @@ export async function importRoutes(app: FastifyInstance) {
 
   app.get("/imports", async () => {
     const all = await db().select().from(imports).orderBy(asc(imports.createdAt));
-    return { imports: all };
+    if (all.length === 0) return { imports: [] };
+
+    const ids = all.map((i) => i.id);
+    const [requestIds, creativeRows] = await Promise.all([
+      db()
+        .select({ id: shotRequests.id })
+        .from(shotRequests)
+        .where(inArray(shotRequests.importId, ids)),
+      db()
+        .select({ importId: importRows.importId, creativeWork: importRows.creativeWork })
+        .from(importRows)
+        .where(inArray(importRows.importId, ids)),
+    ]);
+    const loaded = await loadRequests(requestIds.map((r) => r.id));
+    const readiness = computeReadinessByImport(
+      ids,
+      [...loaded.values()].map((l) => ({ importId: l.request.importId, status: l.status })),
+      creativeRows,
+    );
+
+    return { imports: all.map((imp) => ({ ...imp, readiness: readiness[imp.id] })) };
   });
 
   app.get<{ Params: { id: string } }>("/imports/:id", async (req, reply) => {

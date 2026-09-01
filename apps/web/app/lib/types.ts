@@ -14,6 +14,7 @@ export interface ImportRecord {
   headers: string[];
   rowCount: number;
   confirmedAt: string | null;
+  readiness?: ImportReadiness;
 }
 
 export interface ProductRecord {

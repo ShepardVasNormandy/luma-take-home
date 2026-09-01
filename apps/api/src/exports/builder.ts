@@ -104,6 +104,21 @@ export function computeImportReadiness(
     : "PARTIAL";
 }
 
+export function computeReadinessByImport(
+  importIds: string[],
+  requests: { importId: string; status: RequestStatus }[],
+  rows: (ReadinessRowLike & { importId: string })[],
+): Record<string, ImportReadiness> {
+  const result: Record<string, ImportReadiness> = {};
+  for (const id of importIds) {
+    result[id] = computeImportReadiness(
+      requests.filter((r) => r.importId === id),
+      rows.filter((r) => r.importId === id),
+    );
+  }
+  return result;
+}
+
 const FILENAME_TOKENS: Record<ImportReadiness, string> = {
   READY: "ready",
   PARTIAL: "partial",

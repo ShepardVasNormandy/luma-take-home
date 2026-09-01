@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, errorMessage } from "./lib/api";
-import { shortDate } from "./lib/status";
+import { READINESS_LABELS, shortDate } from "./lib/status";
 import { Shell } from "./lib/Shell";
 import type { ImportRecord } from "./lib/types";
 
@@ -128,10 +128,14 @@ export default function ImportsPage() {
                     <td className="muted">{shortDate(imp.createdAt)}</td>
                     <td className="muted">{imp.rowCount}</td>
                     <td>
-                      {imp.confirmedAt ? (
-                        <span className="chip chip-green">Confirmed</span>
-                      ) : (
+                      {!imp.confirmedAt ? (
                         <span className="chip chip-amber">Staged</span>
+                      ) : (
+                        <span
+                          className={`chip ${imp.readiness === "READY" ? "chip-green" : "chip-neutral"}`}
+                        >
+                          {imp.readiness ? READINESS_LABELS[imp.readiness] : "Confirmed"}
+                        </span>
                       )}
                     </td>
                   </tr>
