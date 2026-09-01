@@ -20,7 +20,7 @@
   --blue-soft: #e2e8ee;
   --gray: #6d7265;
   --gray-soft: #e9e7df;
-  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -86,7 +86,7 @@ h3 {
   margin: 0 auto;
   padding: 14px 24px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
 }
 
@@ -95,11 +95,51 @@ h3 {
   font-size: 18px;
   font-weight: 700;
   color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
 }
 
 .brand:hover {
   text-decoration: none;
   color: var(--accent);
+}
+
+/* The viewfinder mark: a frame with the shot inside it — the whole product
+   in one glyph. Used in the header, the login moment, and the favicon. */
+.mark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 7px;
+  position: relative;
+  display: inline-block;
+  flex: none;
+}
+
+.mark::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  right: 3px;
+  bottom: 3px;
+}
+
+.mark-lg {
+  width: 44px;
+  height: 44px;
+  border-width: 3.5px;
+  border-radius: 14px;
+}
+
+.mark-lg::after {
+  width: 12px;
+  height: 12px;
+  right: 6px;
+  bottom: 6px;
 }
 
 .brand-tag {
@@ -744,7 +784,7 @@ details.history summary {
 }
 
 .login-wrap {
-  min-height: 82vh;
+  min-height: 88vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -753,7 +793,29 @@ details.history summary {
 
 .login-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 390px;
+}
+
+.login-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.login-hero h1 {
+  font-size: 30px;
+  letter-spacing: -0.01em;
+}
+
+.login-hero .promise {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15.5px;
+  color: var(--muted);
+  margin: 0;
 }
 
 .summary-strip {

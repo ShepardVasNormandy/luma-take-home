@@ -30,12 +30,13 @@ export default function LoginPage() {
 
   return (
     <div className="login-wrap">
-      <div className="login-card card card-pad">
-        <h1>Styled Shots</h1>
-        <p className="muted small" style={{ marginTop: 4 }}>
-          Sign in to the operator workspace.
-        </p>
-        <form onSubmit={submit} className="stack" style={{ marginTop: 18 }}>
+      <div className="login-card">
+        <div className="login-hero">
+          <span className="mark mark-lg" aria-hidden="true" />
+          <h1>Styled Shots</h1>
+          <p className="promise">Shot ideas in. Approved photos out.</p>
+        </div>
+        <form onSubmit={submit} className="stack card card-pad">
           <div>
             <label className="field" htmlFor="email">
               Email

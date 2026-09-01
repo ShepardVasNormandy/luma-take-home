@@ -48,15 +48,22 @@ Second road not taken: **LLM prompt enrichment and Note classification** (ADR-00
 - Aspect-ratio variants, un-approve flows, budget caps, multi-reviewer, roles — none blocks the drop test
 - Zip export of approved assets — highest-value stretch, first thing next
 
-**Next (in order):** zip export → Slack delivery of review links → cross-import asset reuse offers → note classification + priority-aware queue ordering (with a text model) → per-channel crops.
+**Next (in order):** zip export → Slack delivery of review links → reviewer identity / per-decision attribution (concurrent reviewers are last-write-wins today) → cross-import asset reuse offers → note classification + priority-aware queue ordering (with a text model) → per-channel crops.
 
 ## Unit economics
 
-Per uni-1 `image_edit`: **$0.0434, ~55s** (observed in the spike; async provider failures are refunded per docs, sync rejections never charged).
+Per uni-1 `image_edit`, **measured in production** (23 real generations across the verification passes): **$0.0434 per image, 54.1–64.6s latency, 59.0s average**. Async provider failures are refunded per docs, sync rejections never charged — observed failure count in production: zero.
 
-One approved image at the spike's observed quality, assuming direction validates in 1–2 candidates: **$0.04–$0.09 and ~2–4 minutes wall clock** (generation ~1 min; Ellie's decision is seconds; the rest is queue latency, not labor). The 40-product drop at target 2: 40 first candidates ($1.74) + ~60 follow-ups ≈ **$4–6 total** — against a photographer cycle measured in weeks and thousands.
+One approved image, assuming the direction validates in 1–2 candidates: **$0.04–$0.09 and ~2–4 minutes wall clock** (generation ~1 min; Ellie's decision is seconds; the rest is queue latency, not labor). The 40-product drop at target 2: 40 first candidates ($1.74) + ~60 follow-ups ≈ **$4–6 total** — against a photographer cycle measured in weeks and thousands.
 
-*(Numbers to be re-verified from live telemetry after the deployed end-to-end run; the system records actuals per attempt.)*
+## Validated in production
+
+Beyond unit tests, the deployed system passed a staged verification and a bounded stress test on real infrastructure (Railway + Vercel + Luma):
+
+- **100-product production stress test** through the deployed UI: 100 rows parsed/persisted, layout intact under long names, accents, 374-char shot ideas; 20 deferred; 60 no-request; console clean throughout.
+- **22 paid generations for $0.9548**: 20-image batch + 2 second candidates. 22/22 completed, 22/22 assets durably stored on first copy. **Zero provider failures, zero storage retries, zero 429s.** Batch wall clock ≈ 2.5 min with the worker's designed submit/poll caps pacing visibly.
+- Full review loop exercised on a real phone (magic link, packshot compare, structured rejections, decision change via upsert), mixed-status export verified (`Ready / Awaiting review / Needs revision / In progress / Not started / No request` across 100 rows, original order and values preserved).
+- **Known v1 limitation, found live, not a bug:** two reviewers on the same magic link are silent last-write-wins — one current decision per candidate is the locked design, and the projection + spend gates handled a genuinely conflicting flip correctly (an approval overwritten by a rejection re-gated generation, refusing the next paid click). Fine for a one-reviewer team; per-decision attribution or reviewer identity is the v2 item if reviewers multiply.
 
 At **10× catalog** (3,000 products): generation cost scales linearly (~$260–450 per full-catalog pass — still noise vs photography). What actually breaks at 10× is not cost:
 - Ellie's serial-approval throughput becomes the bottleneck → needs batch grid review, a second reviewer, or auto-shortlisting
