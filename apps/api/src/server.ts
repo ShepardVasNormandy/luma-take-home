@@ -6,6 +6,7 @@ import { importRoutes } from "./imports/routes.js";
 import { confirmRoutes } from "./imports/confirm.js";
 import { requestRoutes } from "./requests/routes.js";
 import { assetRoutes } from "./assets/routes.js";
+import { reviewRoutes, reviewSendRoutes } from "./review/routes.js";
 
 export function buildServer() {
   const app = Fastify({ logger: true });
@@ -20,6 +21,7 @@ export function buildServer() {
   app.get("/health", async () => ({ ok: true, ts: new Date().toISOString() }));
 
   app.register(assetRoutes);
+  app.register(reviewRoutes);
 
   // Operator surface. Guarded when auth is configured; SESSION_SECRET-less
   // boot (local dev without env, /health smoke) runs open with a loud warning.
@@ -32,6 +34,7 @@ export function buildServer() {
     await operator.register(importRoutes);
     await operator.register(confirmRoutes);
     await operator.register(requestRoutes);
+    await operator.register(reviewSendRoutes);
   });
 
   return app;
