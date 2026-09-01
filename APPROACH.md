@@ -1,5 +1,12 @@
 # APPROACH
 
+## Live deployment
+
+- **Web (operator + reviewer):** https://luma-take-home-six.vercel.app — Vercel
+- **API + Postgres + private bucket:** Railway (topology and variables in `docs/deploy.md`)
+
+Operator login credentials are shared with the submission, not committed. The reviewer surface needs no credentials — it opens from the emailed magic link.
+
 ## What I built and why
 
 A styled-shot pipeline shaped as a **state machine with generation inside it**, not a generator with a UI. Maya's ask ("can the AI just make the shots?") names the visible bottleneck — but the process this team described breaks in four places, and only one of them is the photographer: requests evaporate (Slack 👍), approvals scatter (threads + email), finals are ambiguous (`IMG_43xx.jpg` shipped wrong for three weeks), and status is unanswerable. Generating faster into that would just make the chaos cheaper.
@@ -39,6 +46,7 @@ Second road not taken: **LLM prompt enrichment and Note classification** (ADR-00
 - Request lifecycle as a pure projection with 19 fixture tests — *status can't drift from facts*
 - Enriched CSV export + asset filenames — *their sheet comes back with answers; kills the IMG_43xx failure mode*
 - Spend telemetry per attempt — *unit economics from real rows, not estimates*
+- Operator dashboard + product catalog (stat band, per-import work counts, URL-state filters, card grid with a request-status rollup and the latest approved shot per product) — *Maya's "see where things stand without having to ask Ellie," as one screen; counts and chips are projections over the same durable facts as everything else. Built from an explicit mockup after the first from-scratch identity pass was judged a miss; reviewer flow untouched. Validated locally against seeded states + unit tests on the projections.*
 
 **Out (deliberately, by value — each with the reason):**
 - Slack integration — see road not taken; v2 delivery channel

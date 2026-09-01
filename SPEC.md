@@ -120,7 +120,7 @@ Auth guard: operator cookie for everything except `/auth/login`, `/review/*` (to
 
 **Imports**
 - `POST /imports` multipart CSV → parse, hash (duplicate → `200 {existing: true, import}`), persist snapshot + rows, compute dispositions, run photo preflight for could-generate rows → staged import
-- `GET /imports` list (+status, ready flag, counts) · `GET /imports/:id` full staging/detail payload (rows, dispositions, diffs vs current products, preflight, request statuses + spend once confirmed)
+- `GET /imports` list — per import: readiness (§3) + work counts `{awaitingReview, ready, noRequest, deferred}`, projected from the same request statuses and row facts readiness uses · `GET /imports/:id` full staging/detail payload (rows, dispositions, diffs vs current products, preflight, request statuses + spend once confirmed)
 - `POST /imports/:id/reconcile {rowIds, choice}` (bulk-capable)
 - `POST /imports/:id/confirm {selectedRowIds}` — validates all PRODUCT_CHANGED rows resolved; applies products; creates shot_requests + direction v1 (INITIAL, verbatim); NEEDS_INPUT rows get requests, no attempts; unchecked eligible rows → deferred_at; selected eligible rows → one generation_attempt each (SUBMITTING). Idempotent guard: 409 if already confirmed.
 - `POST /imports/:id/rows/:rowId/request {shotIdea?}` — start a deferred row (uses row's idea) or author an idea for a NO_REQUEST row; creates request (+attempt if inputs valid). CTA semantics: "Save idea & generate first candidate".
@@ -133,6 +133,10 @@ Auth guard: operator cookie for everything except `/auth/login`, `/review/*` (to
 - `POST /requests/:id/generate {count?}` — enforces: not CLOSED/NEEDS_INPUT; gate (NEEDS_REVISION/GENERATION_BLOCKED reject unless newer direction); budget_exhausted flag blocks; count default = remaining-to-target (min 1); response includes est cost. Creates N attempts (SUBMITTING).
 - `POST /requests/:id/close {reason?}` · `POST /requests/:id/reopen`
 - `POST /requests/:id/required-approvals {value}`
+
+**Products**
+- `GET /products` — canonical catalog (one row per SKU) + per-product request rollup: `requestCount`, `statusCounts`, `approvedCount`, and `approvedAssetPublicId` — the most recently approved STORED candidate, served as the app-owned `/assets/:publicId` capability URL, never a provider URL. One `loadRequests` batch, no per-product queries.
+- `GET /products/:id` — product, its requests (status, progress, spend), and appearances (immutable row snapshots for the SKU across imports, in import order).
 
 **Review**
 - `POST /imports/:id/review/send` — create-or-refresh session (new token, expiry +30d), email via Resend to `REVIEWER_EMAIL` ("N shots ready for review" + link `WEB_URL/review/<rawToken>`). One Reviewer in v1: recipient is config, no reviewer table/UI.
@@ -158,7 +162,9 @@ Invariants enforced here: no duplicate paid POST; provider id survives restart; 
 
 Operator (cookie-gated):
 - `/login`
-- `/` — imports list (name, date, staged/confirmed, ready/partial badge, counts) + CSV upload dropzone (duplicate-hash → navigates to existing)
+- `/` — imports dashboard: stat band (imports, products, awaiting review, ready, no request, deferred), search/status/time filters + pagination as URL query state (nuqs), counts table with fully clickable rows, "New import" upload button + page-wide drag-and-drop (duplicate-hash → navigates to existing)
+- `/products` — catalog card grid (packshot, SKU, attributes, request-rollup status chip, latest approved thumbnail + "+N"), search + pagination in URL
+- `/products/[id]` — product detail: requests + appearances across imports
 - `/imports/[id]` — staged: rows table (dispositions, product diffs w/ keep/use-imported + bulk bar, photo flags, preflight, verbatim Notes, selection checkboxes) + confirm bar ("Confirm & generate N first candidates · est $X"). Confirmed: request board (status chips, filters, spend summary, budget banner slot, Send-for-review w/ pending count, export buttons, deferred rows section w/ "Start" actions, NO_REQUEST rows w/ "Add idea").
 - `/requests/[id]` — packshot + idea (immutable) + Notes verbatim; direction editor (current + append-only history, provenance tags); candidates grid (image, decision badge, reason/comment surfaced next to generate controls); generate controls (default count = remaining, explicit cost label, disabled states w/ reason: gated/blocked/budget/closed); attempts log (state, failure, latency, cost, provider id, "retry generation"/"retry copy" where applicable, "status unknown" case); close/reopen; required-approvals stepper.
 
