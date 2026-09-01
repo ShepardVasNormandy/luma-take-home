@@ -49,7 +49,4 @@ export const PRICE_USD = {
 
 export type GenerationModel = keyof typeof PRICE_USD;
 
-// Implemented in T03 against SPEC.md §3 precedence.
-export function projectStatus(): RequestStatus {
-  throw new Error("projectStatus not implemented yet (T03)");
-}
+export * from "./projection.js";

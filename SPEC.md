@@ -89,11 +89,11 @@ Pure function `projectStatus(request, rows...)` in `packages/shared`, unit-teste
 
 1. `CLOSED` — closed_at set
 2. `NEEDS_INPUT` — required generation input unusable (photo missing / preflight FAILED and not re-resolved)
-3. `GENERATING` — any attempt in SUBMITTING/POSTING/QUEUED/PROCESSING, **or** any candidate whose asset is PENDING/FAILED (copy in progress = still producing)
+3. `GENERATING` — any attempt in SUBMITTING/POSTING/QUEUED/PROCESSING, **or** any candidate whose asset copy is PENDING (still producing). An asset in FAILED belongs to rule 7, not here — export vocabulary already maps persistence failure to "Needs attention"
 4. `AWAITING_REVIEW` — ≥1 reviewable candidate without decision
 5. `READY` — approvals-with-STORED-asset ≥ required_approvals
 6. `GENERATION_BLOCKED` — latest attempt FAILED with `content_moderated` and no direction version newer than it
-7. `GENERATION_FAILED` — latest attempt FAILED (other codes) or UNKNOWN, and nothing newer succeeded
+7. `GENERATION_FAILED` — latest attempt FAILED (other codes) or UNKNOWN, and nothing newer succeeded; **or** any candidate's asset copy is FAILED (retries exhausted — "Retry copy" is the surfaced action)
 8. `NEEDS_REVISION` — approvals = 0, latest decided candidate REJECTED with invalidating reason (or no reason), and no direction version newer than that candidate's
 9. `IN_PROGRESS` — approvals ≥ 1 (< required)
 10. `READY_TO_GENERATE` — everything else (gate lifted / nothing in flight / not yet generated)
