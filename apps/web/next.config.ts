@@ -4,6 +4,10 @@ const API_URL = process.env.API_URL ?? "http://localhost:3001";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@shots/shared"],
+  webpack: (config) => {
+    config.resolve.extensionAlias = { ".js": [".ts", ".tsx", ".js"] };
+    return config;
+  },
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${API_URL}/:path*` }];
   },

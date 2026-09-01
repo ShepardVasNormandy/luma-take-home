@@ -52,7 +52,7 @@ function serialize(loaded: LoadedRequest) {
     candidates: candidates.map((c) => ({
       id: c.id,
       createdAt: c.createdAt,
-      assetPublicId: c.asset?.storeState === "STORED" ? c.asset.publicId : null,
+      assetPublicId: c.asset?.publicId ?? null,
       assetState: c.asset?.storeState ?? null,
       decision: c.decision
         ? {
