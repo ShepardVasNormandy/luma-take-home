@@ -7,6 +7,7 @@ import { confirmRoutes } from "./imports/confirm.js";
 import { requestRoutes } from "./requests/routes.js";
 import { assetRoutes } from "./assets/routes.js";
 import { reviewRoutes, reviewSendRoutes } from "./review/routes.js";
+import { exportRoutes } from "./exports/routes.js";
 
 export function buildServer() {
   const app = Fastify({ logger: true });
@@ -35,6 +36,7 @@ export function buildServer() {
     await operator.register(confirmRoutes);
     await operator.register(requestRoutes);
     await operator.register(reviewSendRoutes);
+    await operator.register(exportRoutes);
   });
 
   return app;
