@@ -1,10 +1,15 @@
 export const css = `
 :root { color-scheme: light; }
-body { margin: 0; background: #faf7f2; }
+/* The document must not scroll: on iOS Safari a scrolling document pins
+   sticky/fixed bottom elements to the layout viewport, which hides behind
+   the expanded bottom address bar on first load. Scrolling happens inside
+   .rv-frame instead, whose bottom edge is always the visible edge. */
+html, body { height: 100%; }
+body { margin: 0; background: #faf7f2; overflow: hidden; }
 
 .rv-root {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   background: #faf7f2;
   color: #26221c;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -15,8 +20,9 @@ body { margin: 0; background: #faf7f2; }
 .rv-frame {
   width: 100%;
   max-width: 520px;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
 }
