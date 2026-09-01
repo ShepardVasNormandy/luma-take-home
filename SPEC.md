@@ -186,7 +186,7 @@ Secret hygiene: `scripts/hash-password.ts` generates the argon2 hash for `OPERAT
 ## 10. Testing (focused, not exhaustive)
 
 - `projectStatus` fixture table (every precedence rule + gate/invalidatesDirection cases)
-- CSV: parse quirky fixture (the real catalog), staging dispositions, export round-trip (semantic preservation, column math, status vocabulary)
+- CSV: parse a customer-shaped synthetic fixture (quoted commas, multi-value colors, SKU gaps, blank cells — the real catalog lives outside the repo), staging dispositions, export round-trip (semantic preservation, column math, status vocabulary)
 - Prompt assembly snapshot
 - Worker handlers with mocked Luma/bucket: submit crash-recovery (UNKNOWN), asset retry never POSTs, budget flag
 - Review decision endpoint: staleness 409, upsert

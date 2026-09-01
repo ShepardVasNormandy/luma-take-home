@@ -1,15 +1,21 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { CsvParseError, parseCatalogCsv } from "../src/imports/parse.js";
 import { computeDisposition, type CurrentProduct } from "../src/imports/stage.js";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-const realCatalog = () => readFileSync(path.join(repoRoot, "data/catalog.csv"));
+// Synthetic fixture replicating the shape and quirks of the customer's
+// export (quoted commas, multi-value colors, tentative ideas, SKU gaps,
+// blank cells) without shipping customer data in the repo.
+const SYNTHETIC_CATALOG = [
+  "SKU,Product Name,Category,Color / Finish,Material,Price,Photo,Shot Idea,Notes",
+  'SY-001,Test Mug 12oz,Ceramics,Sage,Stoneware,$28,https://example.com/sy-001.jpg,"morning kitchen counter, steam, warm light","EL: bestseller, do this one first"',
+  "SY-002,Test Vase,Ceramics,Terracotta,Stoneware,$48,https://example.com/sy-002.jpg,,",
+  'SY-004,Test Bowl Large,Ceramics,Forest,Stoneware,$52,https://example.com/sy-004.jpg,"on a set dinner table, with food in it?",reordered constantly',
+  "SY-005,Test Canister Set (3),Kitchen,Cream Terracotta Sage,Stoneware,$64,https://example.com/sy-005.jpg,,",
+  "SY-007,Test Basket,Kitchen,Sage Liner,Rattan + linen,$32,https://example.com/sy-007.jpg,,came out too shiny in last shoot",
+].join("\n");
 
-describe("parseCatalogCsv on the real customer export", () => {
-  const parsed = parseCatalogCsv(realCatalog());
+describe("parseCatalogCsv on a customer-shaped export", () => {
+  const parsed = parseCatalogCsv(Buffer.from(SYNTHETIC_CATALOG));
 
   it("preserves header order exactly", () => {
     expect(parsed.headers).toEqual([
@@ -25,29 +31,29 @@ describe("parseCatalogCsv on the real customer export", () => {
     ]);
   });
 
-  it("parses all 40 rows, all valid", () => {
-    expect(parsed.rows).toHaveLength(40);
+  it("parses all rows as valid despite SKU gaps", () => {
+    expect(parsed.rows).toHaveLength(5);
     expect(parsed.rows.every((r) => r.validity === "VALID")).toBe(true);
   });
 
-  it("keeps the customer's quirks intact", () => {
-    const mug = parsed.rows.find((r) => r.sku === "HG-002")!;
+  it("keeps customer-style quirks intact", () => {
+    const mug = parsed.rows.find((r) => r.sku === "SY-001")!;
     expect(mug.shotIdea).toBe("morning kitchen counter, steam, warm light");
-    expect(mug.notes).toBe("El: bestseller, do this one first");
+    expect(mug.notes).toBe("EL: bestseller, do this one first");
 
-    const bowl = parsed.rows.find((r) => r.sku === "HG-005")!;
+    const bowl = parsed.rows.find((r) => r.sku === "SY-004")!;
     expect(bowl.shotIdea).toBe("on a set dinner table, with food in it?");
 
-    const canisters = parsed.rows.find((r) => r.sku === "HG-018")!;
+    const canisters = parsed.rows.find((r) => r.sku === "SY-005")!;
     expect(canisters.colorFinish).toBe("Cream Terracotta Sage");
   });
 
-  it("finds exactly the 16 shot ideas the brief mentions", () => {
-    expect(parsed.rows.filter((r) => r.shotIdea !== null)).toHaveLength(16);
+  it("counts shot ideas correctly", () => {
+    expect(parsed.rows.filter((r) => r.shotIdea !== null)).toHaveLength(2);
   });
 
   it("keeps raw values verbatim per row for export round-trip", () => {
-    const basket = parsed.rows.find((r) => r.sku === "HG-022")!;
+    const basket = parsed.rows.find((r) => r.sku === "SY-007")!;
     expect(basket.raw["Notes"]).toBe("came out too shiny in last shoot");
     expect(basket.raw["Shot Idea"]).toBe("");
     expect(basket.shotIdea).toBeNull();
