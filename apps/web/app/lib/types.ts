@@ -30,6 +30,42 @@ export interface ProductRecord {
   updatedAt: string;
 }
 
+export interface ProductListItem extends ProductRecord {
+  requestCount: number;
+}
+
+export interface ProductRequestSummary {
+  id: string;
+  importId: string;
+  importFilename: string | null;
+  shotIdea: string;
+  status: RequestStatus;
+  approvedCount: number;
+  requiredApprovals: number;
+  spendUsd: number;
+  createdAt: string;
+}
+
+export interface ProductAppearance {
+  importId: string;
+  importFilename: string;
+  importedAt: string;
+  confirmedAt: string | null;
+  rowIndex: number;
+  shotIdea: string | null;
+  notes: string | null;
+  productReconciliation: "NEW_PRODUCT" | "PRODUCT_UNCHANGED" | "PRODUCT_CHANGED" | "INVALID";
+  creativeWork: "NO_REQUEST" | "REQUEST_ELIGIBLE" | "NEEDS_INPUT";
+  deferredAt: string | null;
+  shotRequestId: string | null;
+}
+
+export interface ProductDetail {
+  product: ProductRecord;
+  requests: ProductRequestSummary[];
+  appearances: ProductAppearance[];
+}
+
 export interface ImportRow {
   id: string;
   createdAt: string;

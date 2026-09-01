@@ -5,6 +5,7 @@ import { authPlugin } from "./auth/plugin.js";
 import { importRoutes } from "./imports/routes.js";
 import { confirmRoutes } from "./imports/confirm.js";
 import { requestRoutes } from "./requests/routes.js";
+import { productRoutes } from "./products/routes.js";
 import { assetRoutes } from "./assets/routes.js";
 import { reviewRoutes, reviewSendRoutes } from "./review/routes.js";
 import { exportRoutes } from "./exports/routes.js";
@@ -35,6 +36,7 @@ export function buildServer() {
     await operator.register(importRoutes);
     await operator.register(confirmRoutes);
     await operator.register(requestRoutes);
+    await operator.register(productRoutes);
     await operator.register(reviewSendRoutes);
     await operator.register(exportRoutes);
   });

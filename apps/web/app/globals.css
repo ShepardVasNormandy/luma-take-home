@@ -76,18 +76,98 @@ h3 {
 
 /* ---------- shell ---------- */
 
-.shell-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+.shell {
+  display: flex;
+  min-height: 100vh;
 }
 
-.shell-header-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 14px 24px;
+.sidebar {
+  width: 212px;
+  flex: none;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 22px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 11px;
+  margin-bottom: 22px;
+}
+
+.sidebar-brand .brand-tag {
+  margin-left: 29px;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.side-nav a {
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 7px 11px;
+  border-radius: 8px;
+}
+
+.side-nav a:hover {
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.side-nav a.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.shell .container {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    display: block;
+  }
+
+  .sidebar {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .sidebar-brand {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    margin-bottom: 0;
+  }
+
+  .sidebar-brand .brand-tag {
+    margin-left: 0;
+  }
+
+  .side-nav {
+    flex-direction: row;
+    margin-left: auto;
+  }
 }
 
 .brand {
@@ -480,6 +560,14 @@ tr.row-dim td {
   overflow-x: auto;
 }
 
+tr.row-link {
+  cursor: pointer;
+}
+
+tr.row-link:hover td {
+  background: var(--accent-soft);
+}
+
 /* ---------- forms ---------- */
 
 input[type="text"],
@@ -704,6 +792,43 @@ label.field {
   border-radius: 4px;
   padding-left: 5px;
   padding-right: 5px;
+}
+
+/* ---------- product detail ---------- */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 22px;
+  margin: 0;
+}
+
+.facts dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-weight: 600;
+  padding-top: 2px;
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- misc ---------- */
