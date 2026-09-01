@@ -4,6 +4,7 @@ import { asc, eq, inArray } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { importRows, imports, products, shotRequests } from "../db/schema.js";
 import { computeReadinessByImport } from "../exports/builder.js";
+import { computeImportCounts } from "./counts.js";
 import { loadRequests } from "../requests/projection-loader.js";
 import { CsvParseError, parseCatalogCsv } from "./parse.js";
 import { computeDisposition } from "./stage.js";
@@ -105,18 +106,25 @@ export async function importRoutes(app: FastifyInstance) {
         .from(shotRequests)
         .where(inArray(shotRequests.importId, ids)),
       db()
-        .select({ importId: importRows.importId, creativeWork: importRows.creativeWork })
+        .select({
+          importId: importRows.importId,
+          creativeWork: importRows.creativeWork,
+          deferredAt: importRows.deferredAt,
+        })
         .from(importRows)
         .where(inArray(importRows.importId, ids)),
     ]);
     const loaded = await loadRequests(requestIds.map((r) => r.id));
-    const readiness = computeReadinessByImport(
-      ids,
-      [...loaded.values()].map((l) => ({ importId: l.request.importId, status: l.status })),
-      creativeRows,
-    );
+    const requestFacts = [...loaded.values()].map((l) => ({
+      importId: l.request.importId,
+      status: l.status,
+    }));
+    const readiness = computeReadinessByImport(ids, requestFacts, creativeRows);
+    const counts = computeImportCounts(ids, requestFacts, creativeRows);
 
-    return { imports: all.map((imp) => ({ ...imp, readiness: readiness[imp.id] })) };
+    return {
+      imports: all.map((imp) => ({ ...imp, readiness: readiness[imp.id], counts: counts[imp.id] })),
+    };
   });
 
   app.get<{ Params: { id: string } }>("/imports/:id", async (req, reply) => {
