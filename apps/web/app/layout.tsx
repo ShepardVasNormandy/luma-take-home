@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 const faviconSvg =
   "data:image/svg+xml," +
   encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" rx="9" fill="#f6f4ee" stroke="#2e5941" stroke-width="3.5"/><circle cx="20.5" cy="20.5" r="4.5" fill="#96432e"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="2" width="20" height="20" fill="#191a1e"/><rect x="19" y="19" width="11" height="11" fill="#a6a8ad"/></svg>',
   );
 
 export const metadata = {
@@ -16,7 +17,9 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NuqsAdapter>{children}</NuqsAdapter>
+      </body>
     </html>
   );
 }

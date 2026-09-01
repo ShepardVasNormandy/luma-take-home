@@ -32,7 +32,7 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-hero">
-          <span className="mark mark-lg" aria-hidden="true" />
+          <span className="brand-mark2 brand-mark2-lg" aria-hidden="true" />
           <h1>Styled Shots</h1>
           <p className="promise">Shot ideas in. Approved photos out.</p>
         </div>
