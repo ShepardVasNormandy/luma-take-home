@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { api, errorMessage } from "./lib/api";
@@ -32,7 +32,23 @@ function CountCell({ value, attn = false }: { value: number; attn?: boolean }) {
   );
 }
 
+// nuqs reads useSearchParams, which bails out of static prerender — the
+// Suspense boundary is what Next requires to build this page.
 export default function ImportsPage() {
+  return (
+    <Suspense
+      fallback={
+        <Shell>
+          <p className="muted">Loading…</p>
+        </Shell>
+      }
+    >
+      <ImportsView />
+    </Suspense>
+  );
+}
+
+function ImportsView() {
   const router = useRouter();
   const [imports, setImports] = useState<ImportRecord[] | null>(null);
   const [productCount, setProductCount] = useState<number | null>(null);

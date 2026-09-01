@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { api, errorMessage } from "../lib/api";
 import { productChip } from "../lib/status";
@@ -58,7 +58,22 @@ function ProductCard({ product }: { product: ProductListItem }) {
   );
 }
 
+// Same Suspense requirement as the imports page: nuqs → useSearchParams.
 export default function ProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <Shell>
+          <p className="muted">Loading…</p>
+        </Shell>
+      }
+    >
+      <ProductsView />
+    </Suspense>
+  );
+}
+
+function ProductsView() {
   const [products, setProducts] = useState<ProductListItem[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
