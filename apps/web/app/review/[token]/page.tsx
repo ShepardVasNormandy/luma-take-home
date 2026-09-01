@@ -420,7 +420,7 @@ export default function ReviewPage() {
           </button>
         </div>
       ) : (
-        <div className="rv-actions" style={{ flexWrap: "wrap" }}>
+        <div className="rv-actions rv-actions-solid" style={{ flexWrap: "wrap" }}>
           <span className="rv-saved">
             Saved: {decision.decision === "APPROVED" ? "Approved ✓" : "Rejected ✓"}
           </span>

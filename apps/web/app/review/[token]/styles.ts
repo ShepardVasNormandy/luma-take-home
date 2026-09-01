@@ -170,12 +170,13 @@ body { margin: 0; background: #faf7f2; }
 .rv-decided-no { background: #f6e9e2; color: #8c4326; }
 .rv-decided-note { display: block; font-style: italic; opacity: 0.85; margin-top: 2px; }
 
+.rv-actions-solid { background: #faf7f2; }
 .rv-saved {
   flex: 1;
   min-height: 58px;
   border-radius: 18px;
   border: 1.5px dashed #c9beae;
-  background: transparent;
+  background: #fffdf9;
   color: #5c5344;
   font: inherit;
   font-size: 16px;
