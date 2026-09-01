@@ -52,7 +52,7 @@ Second road not taken: **LLM prompt enrichment and Note classification** (ADR-00
 
 ## Unit economics
 
-Per uni-1 `image_edit`, **measured in production** (23 real generations across the verification passes): **$0.0434 per image, 54.1–64.6s latency, 59.0s average**. Async provider failures are refunded per docs, sync rejections never charged — observed failure count in production: zero.
+Per uni-1 `image_edit`, **measured in production** (23 real generations across the verification passes): **$0.0434 per image, 54.1–64.6s latency, 59.0s average**. Async provider failures are refunded per docs, sync rejections never charged — observed failure count in production: zero. Verifying the entire deployed pipeline — stress test included — cost **$0.9982 total**.
 
 One approved image, assuming the direction validates in 1–2 candidates: **$0.04–$0.09 and ~2–4 minutes wall clock** (generation ~1 min; Ellie's decision is seconds; the rest is queue latency, not labor). The 40-product drop at target 2: 40 first candidates ($1.74) + ~60 follow-ups ≈ **$4–6 total** — against a photographer cycle measured in weeks and thousands.
 
