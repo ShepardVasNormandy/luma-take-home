@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
 import { importRoutes } from "./imports/routes.js";
+import { confirmRoutes } from "./imports/confirm.js";
 
 export function buildServer() {
   const app = Fastify({ logger: true });
@@ -10,6 +11,7 @@ export function buildServer() {
   app.get("/health", async () => ({ ok: true, ts: new Date().toISOString() }));
 
   app.register(importRoutes);
+  app.register(confirmRoutes);
 
   return app;
 }
