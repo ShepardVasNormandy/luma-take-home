@@ -3,6 +3,13 @@ import { PRICE_USD } from "@shots/shared";
 
 export const PRICE_PER_IMAGE = PRICE_USD["uni-1"].imageEdit;
 
+export const READINESS_TONES: Record<ImportReadiness, "green" | "amber" | "gray"> = {
+  READY: "green",
+  PARTIAL: "amber",
+  NOT_STARTED: "gray",
+  NO_REQUESTS: "gray",
+};
+
 export const READINESS_LABELS: Record<ImportReadiness, string> = {
   READY: "Import ready",
   PARTIAL: "Not ready yet",
@@ -54,6 +61,46 @@ export function statusChipClass(status: RequestStatus): string {
     default:
       return "chip chip-neutral";
   }
+}
+
+// Card chip: the single most operator-relevant state among a product's
+// requests — attention first, then motion, then done.
+const PRODUCT_CHIP_PRECEDENCE: RequestStatus[] = [
+  "AWAITING_REVIEW",
+  "NEEDS_INPUT",
+  "NEEDS_REVISION",
+  "GENERATION_BLOCKED",
+  "GENERATION_FAILED",
+  "GENERATING",
+  "IN_PROGRESS",
+  "READY_TO_GENERATE",
+  "READY",
+  "CLOSED",
+];
+
+const PRODUCT_CHIP_TONES: Record<RequestStatus, "green" | "amber" | "red" | "blue" | "gray"> = {
+  AWAITING_REVIEW: "blue",
+  NEEDS_INPUT: "red",
+  NEEDS_REVISION: "red",
+  GENERATION_BLOCKED: "red",
+  GENERATION_FAILED: "red",
+  GENERATING: "amber",
+  IN_PROGRESS: "amber",
+  READY_TO_GENERATE: "gray",
+  READY: "green",
+  CLOSED: "gray",
+};
+
+export function productChip(statusCounts: Partial<Record<RequestStatus, number>>): {
+  label: string;
+  tone: "green" | "amber" | "red" | "blue" | "gray";
+} {
+  for (const status of PRODUCT_CHIP_PRECEDENCE) {
+    if ((statusCounts[status] ?? 0) > 0) {
+      return { label: STATUS_LABELS[status], tone: PRODUCT_CHIP_TONES[status] };
+    }
+  }
+  return { label: "No request", tone: "gray" };
 }
 
 export const REASON_LABELS: Record<RejectionReason, string> = {

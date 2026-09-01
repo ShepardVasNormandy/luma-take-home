@@ -13,6 +13,7 @@
   "dependencies": {
     "@shots/shared": "workspace:*",
     "next": "^15.0.0",
+    "nuqs": "^2.10.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

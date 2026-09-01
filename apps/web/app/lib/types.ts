@@ -15,6 +15,12 @@ export interface ImportRecord {
   rowCount: number;
   confirmedAt: string | null;
   readiness?: ImportReadiness;
+  counts?: {
+    awaitingReview: number;
+    ready: number;
+    noRequest: number;
+    deferred: number;
+  };
 }
 
 export interface ProductRecord {
@@ -32,6 +38,9 @@ export interface ProductRecord {
 
 export interface ProductListItem extends ProductRecord {
   requestCount: number;
+  statusCounts: Partial<Record<RequestStatus, number>>;
+  approvedCount: number;
+  approvedAssetPublicId: string | null;
 }
 
 export interface ProductRequestSummary {
