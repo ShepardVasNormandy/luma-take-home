@@ -23,6 +23,9 @@ body { margin: 0; background: #faf7f2; }
 
 .rv-serif { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
 
+/* Kill iOS double-tap viewport zoom on controls only — pinch zoom stays available everywhere. */
+.rv-pill, .rv-btn, .rv-navbtn, .rv-chip, .rv-textbtn, .rv-imagewrap { touch-action: manipulation; }
+
 .rv-top {
   display: flex;
   align-items: center;
@@ -166,6 +169,22 @@ body { margin: 0; background: #faf7f2; }
 .rv-decided-yes { background: #e8eee6; color: #33523d; }
 .rv-decided-no { background: #f6e9e2; color: #8c4326; }
 .rv-decided-note { display: block; font-style: italic; opacity: 0.85; margin-top: 2px; }
+
+.rv-saved {
+  flex: 1;
+  min-height: 58px;
+  border-radius: 18px;
+  border: 1.5px dashed #c9beae;
+  background: transparent;
+  color: #5c5344;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rv-keep { width: 100%; text-align: center; margin-top: 2px; }
 
 .rv-actions {
   position: sticky;

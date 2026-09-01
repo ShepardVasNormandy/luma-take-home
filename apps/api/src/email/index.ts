@@ -20,7 +20,7 @@ export async function sendReviewEmail(input: SendReviewEmailInput): Promise<{ id
   const from = requireConfig("REVIEW_FROM_EMAIL");
   const to = requireConfig("REVIEWER_EMAIL");
 
-  const subject = `${input.pendingCount} shots ready for review`;
+  const subject = `${input.pendingCount} shot${input.pendingCount === 1 ? "" : "s"} ready for review`;
   const safeImportName = escapeHtml(input.importName);
   const safeUrl = escapeHtml(input.reviewUrl);
 

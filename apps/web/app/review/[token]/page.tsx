@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   ApiError,
@@ -241,14 +241,21 @@ export default function ReviewPage() {
     [token],
   );
 
+  const [checking, setChecking] = useState(false);
+
   const refresh = useCallback(async () => {
+    setChecking(true);
     try {
       const data = await fetchSession(token);
-      dispatch({ type: "REFRESHED", data, notice: null, advance: false, drop: null });
+      const notice =
+        data.pending.length === 0 ? "Checked just now — still nothing new." : null;
+      dispatch({ type: "REFRESHED", data, notice, advance: false, drop: null });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         dispatch({ type: "DEAD", code: err.code });
       }
+    } finally {
+      setChecking(false);
     }
   }, [token]);
 
@@ -323,13 +330,19 @@ export default function ReviewPage() {
             Every tap was saved on the spot — there&rsquo;s nothing to submit. New shots may
             appear here later, so hold on to this link.
           </p>
+          {state.notice && <div className="rv-notice">{state.notice}</div>}
           {state.history.length > 0 && (
             <button type="button" className="rv-pill" onClick={() => dispatch({ type: "BACK" })}>
               Look back at your decisions
             </button>
           )}
-          <button type="button" className="rv-textbtn" onClick={() => void refresh()}>
-            Check for new shots
+          <button
+            type="button"
+            className="rv-textbtn"
+            disabled={checking}
+            onClick={() => void refresh()}
+          >
+            {checking ? "Checking…" : "Check for new shots"}
           </button>
         </div>
       </Shell>
@@ -385,30 +398,63 @@ export default function ReviewPage() {
         </div>
       )}
 
-      <div className="rv-actions">
-        <button
-          type="button"
-          className="rv-btn rv-rejectbtn"
-          disabled={busy}
-          onClick={() => dispatch({ type: "SHEET", open: true })}
-        >
-          {decision?.decision === "REJECTED" ? "Rejected ✓" : "Reject"}
-        </button>
-        <button
-          type="button"
-          className="rv-btn rv-approve"
-          disabled={busy}
-          onClick={() =>
-            void decide(entry, { decision: "APPROVED", reason: null, comment: null }, origin)
-          }
-        >
-          {state.busy === "APPROVED"
-            ? "Saving…"
-            : decision?.decision === "APPROVED"
-              ? "Approved ✓"
-              : "Approve"}
-        </button>
-      </div>
+      {decision === null ? (
+        <div className="rv-actions">
+          <button
+            type="button"
+            className="rv-btn rv-rejectbtn"
+            disabled={busy}
+            onClick={() => dispatch({ type: "SHEET", open: true })}
+          >
+            Reject
+          </button>
+          <button
+            type="button"
+            className="rv-btn rv-approve"
+            disabled={busy}
+            onClick={() =>
+              void decide(entry, { decision: "APPROVED", reason: null, comment: null }, origin)
+            }
+          >
+            {state.busy === "APPROVED" ? "Saving…" : "Approve"}
+          </button>
+        </div>
+      ) : (
+        <div className="rv-actions" style={{ flexWrap: "wrap" }}>
+          <span className="rv-saved">
+            Saved: {decision.decision === "APPROVED" ? "Approved ✓" : "Rejected ✓"}
+          </span>
+          {decision.decision === "APPROVED" ? (
+            <button
+              type="button"
+              className="rv-btn rv-rejectbtn"
+              disabled={busy}
+              onClick={() => dispatch({ type: "SHEET", open: true })}
+            >
+              {state.busy === "REJECTED" ? "Saving…" : "Change to reject…"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="rv-btn rv-approve"
+              disabled={busy}
+              onClick={() =>
+                void decide(entry, { decision: "APPROVED", reason: null, comment: null }, origin)
+              }
+            >
+              {state.busy === "APPROVED" ? "Saving…" : "Change to approve"}
+            </button>
+          )}
+          <button
+            type="button"
+            className="rv-textbtn rv-keep"
+            disabled={busy}
+            onClick={() => dispatch({ type: "FORWARD" })}
+          >
+            Keep decision ›
+          </button>
+        </div>
+      )}
 
       {state.sheetOpen && (
         <RejectSheet

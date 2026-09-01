@@ -13,7 +13,9 @@ export async function importRoutes(app: FastifyInstance) {
     if (!file) return reply.code(400).send({ error: "Missing CSV file upload" });
 
     const buffer = await file.toBuffer();
-    const contentHash = createHash("sha256").update(buffer).digest("hex");
+    const contentHash = createHash("sha256")
+      .update(new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength))
+      .digest("hex");
 
     const existing = await db().query.imports.findFirst({
       where: eq(imports.contentHash, contentHash),

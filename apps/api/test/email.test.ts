@@ -33,13 +33,13 @@ beforeEach(() => {
 });
 
 describe("sendReviewEmail", () => {
-  it("formats the subject as 'N shots ready for review'", async () => {
+  it("formats the subject with correct pluralization", async () => {
     await sendReviewEmail(input);
     expect(sendMock).toHaveBeenCalledOnce();
     expect(sendMock.mock.calls[0]![0].subject).toBe("7 shots ready for review");
 
     await sendReviewEmail({ ...input, pendingCount: 1 });
-    expect(sendMock.mock.calls[1]![0].subject).toBe("1 shots ready for review");
+    expect(sendMock.mock.calls[1]![0].subject).toBe("1 shot ready for review");
   });
 
   it("wires to/from/apiKey from config env", async () => {
