@@ -16,3 +16,5 @@ apps/*/dist/
 packages/*/dist/
 .next/
 *.tsbuildinfo
+.vercel
+.env*
