@@ -48,6 +48,13 @@ One project, three services:
 - [ ] `<vercel-web>/api/health` → same 200 through the rewrite
 - [ ] Login works end-to-end (cookie via rewrite)
 
+## Operational findings (from the production verification pass)
+
+- **Migrations must run inside Railway's network** — the Postgres service exposes no public endpoint (`postgres.railway.internal` only, no `DATABASE_PUBLIC_URL`). Working path: register an SSH key once (`railway ssh keys add`; proxy host is `ssh.railway.com` — add a `StrictHostKeyChecking accept-new` block if non-interactive), then `railway ssh -- pnpm --filter @shots/api db:migrate`. Idempotent; drizzle journal makes re-runs no-ops.
+- **Railway variable edits are staged until deployed** — saving vars in the UI without triggering a deploy leaves the running service on old env (this bit us: auth vars existed but weren't live).
+- **Vercel deploys are CLI-driven** (`vercel --prod --yes` from `apps/web`), not GitHub-integrated; `API_URL` is stored as a sensitive env var. Rewrites are baked at build — any `API_URL` change needs a redeploy.
+- **Read-only prod DB checks**: drop a script into `/app/apps/api/` via `railway ssh` (module resolution needs the app dir; `/tmp` can't resolve `node_modules`).
+
 ## Notes
 
 - Resend demo mode: `onboarding@resend.dev` delivers only to the Resend account owner's inbox — point REVIEWER_EMAIL at that inbox for the demo, or verify a domain.
