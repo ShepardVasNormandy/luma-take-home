@@ -112,7 +112,7 @@ Photorealistic lifestyle product photograph.
 ```
 POST body: `{ model: 'uni-1', type: 'image_edit', prompt, source: { url: product.photo_url }, output_format: 'jpeg' }`. Exact body persisted on the attempt. `docs/adr/0002` is the authority for this template — changing it requires new evidence.
 
-## 5. API surface (Fastify, prefix `/v1`)
+## 5. API surface (Fastify, routes at root — the web app's `/api/:path*` rewrite passes paths through verbatim; no `/v1` prefix in v1)
 
 Auth guard: operator cookie for everything except `/auth/login`, `/review/*` (token), `/assets/*` (public capability).
 

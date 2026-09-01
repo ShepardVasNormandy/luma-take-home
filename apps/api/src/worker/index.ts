@@ -1,9 +1,14 @@
 import type { FastifyBaseLogger } from "fastify";
+import { runPollHandler, runSubmitHandler } from "./generation.js";
+import { runStoreHandler } from "./assets.js";
 
 type Handler = { name: string; run: () => Promise<void> };
 
-// Handlers arrive with T06 (submit, poll) and T07 (store).
-const handlers: Handler[] = [];
+const handlers: Handler[] = [
+  { name: "generation-submit", run: runSubmitHandler },
+  { name: "generation-poll", run: runPollHandler },
+  { name: "asset-store", run: runStoreHandler },
+];
 
 export function startWorker(log: FastifyBaseLogger, intervalMs = 4000) {
   let running = false;
